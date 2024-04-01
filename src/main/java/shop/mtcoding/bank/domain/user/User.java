@@ -2,6 +2,9 @@ package shop.mtcoding.bank.domain.user;
 
 import java.time.LocalDateTime;
 
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -22,8 +25,8 @@ import lombok.Getter;
 @Table(name = "user_tb")
 @Getter
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor(access = AccessLevel.PROTECTED) //스프링이 User 객체 생성할 때 빈 생성자로 new를 하기 때문!!
 public class User { // extends 시간 설정(ex. BaseEntity) 상속해도 됨
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -52,5 +55,15 @@ public class User { // extends 시간 설정(ex. BaseEntity) 상속해도 됨
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    
+    @Builder
+    public User(Long id, String username, String password, String email, String fullname, UserEnum role, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.fullname = fullname;
+        this.role = role;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }
