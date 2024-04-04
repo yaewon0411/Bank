@@ -13,7 +13,7 @@
     private LocalDateTime updatedAt;
 ```
 
-### @NoArgaConstructor 사용 이유
+### @NoArgsConstructor 사용 이유
 - 모든 엔티티는 기본 생성자를 가져야 함!
   - JPA 구현체가 객체를 프록시로 생성하거나, DB로부터 조회하여 객체를 복구할 때 필요
 - access level은 protected로 설정하자
@@ -35,3 +35,11 @@ public class SecurityConfigTest {
 - 내가 모르는 에러가 프론트한테 날라가지 않게 직접 다 제어하자 (CustomResponseUtil로 관리)
   - 인증 실패 예외 처리 커스텀 
   - 권한 실패 예외 처리 커스텀
+
+### Spring AOP
+  - **공통으로 사용되는 코드를 분리하여 관리** -> 코드 재사용성 관리 편의성 향상
+  - @Aspect: : 클래스가 AOP 관점을 정의하고 있음을 나타내는 어노테이션
+  - @Pointcut : 특정 조건에 맞는 조인 포인트(프로그램 실행 중 특정 위치)를 식별하는 데 사용
+  - @Advice : 특정 조인 포인트에서 Aspect에 의해 취해질 조치. 종류로는 Before, After, AfterReturning, AfterThrowing, Around 등이 있음
+    - @Around : 정의된 포인트컷에 대해 실제 메서드 전후로 추가 로직을 실행하도록 지정
+  - ex) validationAdvice 메서드에서 컨트롤러 메서드의 매개변수들을 순회하며 BindingResult 타입 인스턴스를 찾으며 유효성 검사 수행
