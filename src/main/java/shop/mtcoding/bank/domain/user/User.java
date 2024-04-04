@@ -25,7 +25,7 @@ import lombok.Getter;
 @Table(name = "user_tb")
 @Getter
 @EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor(access = AccessLevel.PROTECTED) //스프링이 User 객체 생성할 때 빈 생성자로 new를 하기 때문!!
+@NoArgsConstructor //스프링이 User 객체 생성할 때 빈 생성자로 new를 하기 때문!!
 public class User { // extends 시간 설정(ex. BaseEntity) 상속해도 됨
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
