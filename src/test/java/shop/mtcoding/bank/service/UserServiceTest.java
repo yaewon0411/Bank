@@ -59,6 +59,8 @@ public class UserServiceTest extends DummyObject {
         //stub 2
         User ssar = newMockUser(1L, "ssar","쌀");
 
+
+
         when(userRepository.save(any())).thenReturn(ssar);
 
         //when
