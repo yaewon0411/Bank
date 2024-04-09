@@ -46,7 +46,14 @@ public class SecurityConfigTest {
 
 ### 컨트롤러는 DTO의 유효성 검사를 수행해야 한다!!
   - 서비스는 유효성 검사를 하지 않기 때문에 유효성 검증이 안된 DTO를 레포지토리에서 엔티티로 바꿔서 DB에 넣으면 DataException이 발생한다
-  - ex) User의 email 필드가 20자 제한 걸려 있는데 컨트롤러가 유효 검사를 안하면 DB 에러 발생
+    - ex) User의 email 필드가 20자 제한 걸려 있는데 컨트롤러가 유효 검사를 안하면 DB 에러 발생
+  - @Valid, @Validated, 정규 표현식을 사용한 검증 등을 통해 유효성 검사 가능
 
-### 컨트롤러 정규 표현식
-  - @
+### DTO 정규 표현식 검증 적용하기
+  - @Pattern : 문자열 필드가 정규 표현식에 정의된 패턴과 일치하는 지 검사하는 데 사용. 특정 필드에 대한 입력 형식을 엄격하게 제어 가능
+```java
+@Pattern(regexp = "^[a-zA-Z가-힣]{1,20}$", message = "한글/영문 1~20자 이내로 작성해주세요")
+private String fullName;
+```
+  - regexp : 검사할 문자열이 일치해야 하는 정규 표현식
+  - message : 유효성 검사를 통과하지 못할 경우 반환될 에러 메시지
