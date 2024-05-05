@@ -11,6 +11,15 @@ import shop.mtcoding.bank.domain.user.UserEnum;
 
 public class UserReqDto {
     //관련된 DTO들 필요하면 안에 계속 채울 예정
+
+    @Getter @Setter
+    public static class LoginReqDto{ // 얘는 validation check 못함. 컨트롤러 레이러로 가기 전인 시큐리티 필터에서 검증받는 애라서 제어를 못함.
+        private String username;
+        private String password;
+    }
+
+
+
     @Getter
     @Setter
     public static class JoinReqDto{

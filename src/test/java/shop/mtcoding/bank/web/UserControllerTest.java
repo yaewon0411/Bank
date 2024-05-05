@@ -1,5 +1,6 @@
 package shop.mtcoding.bank.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
@@ -22,6 +25,7 @@ import static shop.mtcoding.bank.dto.user.UserReqDto.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class UserControllerTest extends DummyObject { //SpringBootTest에서 하는 Controller 테스트는 통합 테스트
 
+    //가짜 환경에 등록된 MockMvc를 DI
     @Autowired
     private MockMvc mvc;
 
@@ -52,16 +56,23 @@ public class UserControllerTest extends DummyObject { //SpringBootTest에서 하
         ResultActions  resultActions = mvc.perform(post("/api/join")
                 .content(requestBody)
                 .contentType(MediaType.APPLICATION_JSON));
-        
+
+//        mvc.perform(MockMvcRequestBuilders
+//                .post("/api/join")
+//                .content(requestBody)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isCreated());
+
         String responseBody = resultActions.andReturn()
                 .getResponse()
                 .getContentAsString();
-        //System.out.println("responseBody = " + responseBody);
 
         //then
         resultActions.andExpect(status().isCreated());
 
     }
+
 
     @Test
     public void join_fail_test() throws Exception{
@@ -75,18 +86,18 @@ public class UserControllerTest extends DummyObject { //SpringBootTest에서 하
         String requestBody = om.writeValueAsString(joinReqDto);
         //System.out.println("requestBody = " + requestBody);
 
-        //when
-        ResultActions  resultActions = mvc.perform(post("/api/join")
-                .content(requestBody)
-                .contentType(MediaType.APPLICATION_JSON));
+        //when & then
+        ResultActions resultActions =
+                mvc.perform(MockMvcRequestBuilders
+                        .post("/api/join")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isBadRequest());
 
         String responseBody = resultActions.andReturn()
                 .getResponse()
                 .getContentAsString();
-        //System.out.println("responseBody = " + responseBody);
 
-        //then
-        resultActions.andExpect(status().isBadRequest());
     }
 
     private void dataSetting(){
