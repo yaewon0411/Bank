@@ -57,3 +57,12 @@ private String fullName;
 ```
   - regexp : 검사할 문자열이 일치해야 하는 정규 표현식
   - message : 유효성 검사를 통과하지 못할 경우 반환될 에러 메시지
+
+### JwtAuthenticationFilter
+  - 커스텀한 인증 필터 : /api/login 경로에서 실행
+  - 구조 & 시나리오
+    ![img.png](img.png)
+### JwtAuthorizationFilter
+  - 커스텀한 인가 필터 : 모든 경로에서 실행
+  - 구조 & 시나리오
+    ![img_1.png](img_1.png)

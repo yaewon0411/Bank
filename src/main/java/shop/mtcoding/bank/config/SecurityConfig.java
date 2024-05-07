@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,6 +23,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import shop.mtcoding.bank.config.jwt.JwtAuthenticationFilter;
+import shop.mtcoding.bank.config.jwt.JwtAuthorizationFilter;
 import shop.mtcoding.bank.domain.user.UserEnum;
 import shop.mtcoding.bank.dto.ResponseDto;
 import shop.mtcoding.bank.util.CustomResponseUtil;
@@ -46,7 +48,8 @@ public class SecurityConfig {
         @Override
         public void configure(HttpSecurity builder) throws Exception {
             AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
-            builder.addFilter(new JwtAuthenticationFilter(authenticationManager));
+            builder.addFilter(new JwtAuthenticationFilter(authenticationManager)); //만든 필터 등록
+            builder.addFilter(new JwtAuthorizationFilter(authenticationManager)); //만든 필터 등록
             super.configure(builder);
         }
     }
@@ -74,9 +77,13 @@ public class SecurityConfig {
                 .with(new CustomSecurityFilterManager(), customSecurityFilterManager -> customSecurityFilterManager.getClass())
 
 
-                //Exceotion 가로채기
+                //인증 실패 Exception 가로채기
                 .exceptionHandling(handler -> handler.authenticationEntryPoint((request, response, authException) -> {
-                    CustomResponseUtil.unAuthentication(response,"로그인을 진행해 주세요");
+                    CustomResponseUtil.fail(response,"로그인을 진행해 주세요", HttpStatus.UNAUTHORIZED);
+                }))
+                //권한 실패 Exception 가로채기
+                .exceptionHandling(handler -> handler.accessDeniedHandler((request, response, e) -> {
+                    CustomResponseUtil.fail(response, "권한이 없습니다", HttpStatus.FORBIDDEN);
                 }));
 
         return http.build();
