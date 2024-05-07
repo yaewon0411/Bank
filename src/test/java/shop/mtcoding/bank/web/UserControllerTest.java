@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
@@ -23,6 +24,7 @@ import static shop.mtcoding.bank.dto.user.UserReqDto.*;
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@Transactional
 public class UserControllerTest extends DummyObject { //SpringBootTest에서 하는 Controller 테스트는 통합 테스트
 
     //가짜 환경에 등록된 MockMvc를 DI
