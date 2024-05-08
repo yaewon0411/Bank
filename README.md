@@ -67,3 +67,7 @@ private String fullName;
   - 커스텀한 인가 필터 : 모든 경로에서 실행
   - 구조 & 시나리오
     ![img_1.png](img_1.png)
+### @WithUserDetails
+  - 로그인된 사용자만 사용할 수 있는 기능 테스트 시 사용
+  - UserDetailsService가 구현하는 객체가 있는지 DB에서 조회하고, 있다면 그 객체를 시큐티리 세션에 담아준다
+  - 만약 BeforeEach로 DB에 값을 세팅해주고 있다면, setupBefore = TestExecutionEvent.TEST_EXECUTION를 설정해서 BeforeEach를 통한 셋업이 수행된 후에 @WithUserDetails가 동작하게 해줘야 함
