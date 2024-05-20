@@ -1,9 +1,6 @@
 package shop.mtcoding.bank.config.jwt;
 
-import net.bytebuddy.build.ToStringPlugin;
-import org.assertj.core.api.Assert;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.AssertionsKt;
+
 import org.junit.jupiter.api.Test;
 import shop.mtcoding.bank.config.auth.LoginUser;
 import shop.mtcoding.bank.domain.user.User;
@@ -14,14 +11,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class JwtProcessTest {
 
-    @Test
-    public void create_test() throws Exception{
+    private String createToken(){
         //given
         User user = User.builder().id(1L).role(UserEnum.ADMIN).build();
         LoginUser loginUser = new LoginUser(user); //id와 role만
 
         //when
-        String jwtToken = JwtProcess.create(loginUser);
+        return JwtProcess.create(loginUser);
+    }
+
+    @Test
+    public void create_test() throws Exception{
+        //given
+
+        //when
+        String jwtToken = createToken();
         System.out.println("jwtToken = " + jwtToken);
 
         //then
@@ -31,7 +35,8 @@ public class JwtProcessTest {
     @Test
     public void verify_test() throws Exception{
         //given
-        String jwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiLthqDtgbDsnZgg7KCc66qpOmJhbmsiLCJyb2xlIjoiQURNSU4iLCJpZCI6MSwiZXhwIjoxNzE1Njc1Mjc0fQ.fQnCoiyMeh2XtKn7r6SDNbFdFx_0X9BYyKCS2I895yl-3g6BmjHh1pgdICdzJSy2DQw-gw6ZHR2xl1ZzjTBkCw";
+        String token = createToken(); //Bearer 제거해서 처리하기
+        String jwtToken = token.replace(JwtVo.TOKEN_PREFIX, "");
 
         //when
         LoginUser loginUser = JwtProcess.verify(jwtToken);

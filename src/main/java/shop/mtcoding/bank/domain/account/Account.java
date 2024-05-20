@@ -60,4 +60,8 @@ public class Account {
             throw new CustomApiException("계좌 소유자가 아닙니다");
         }
     }
+
+    public void deposit(Long amount) {
+        balance = balance + amount;
+    }
 }

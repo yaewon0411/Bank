@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +26,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-//가짜 환경에 스프링에 있는 환경들으 스캔해서 올려줘야 함
+//가짜 환경에 스프링에 있는 환경들을 스캔해서 올려줘야 함
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc //mock 환경에 mvc가 new돼서 들어감
 @ActiveProfiles("test")
-@Transactional //디폴트 롤백(롤백안하면 각 테스트마다 beforEach에 있는 똑같은 데이터 삽입돼서 유니크 제약 조건 오류 터짐)
+@Sql("classpath:db/teadown.sql") //SpringBootTest 하는 곳에는 전부 다 teadown.sql을 붙여주자 (@Transactional 대신!!)
 public class JwtAuthenticationFilterTest extends DummyObject {
 
     @Autowired

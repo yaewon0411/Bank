@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;
 
+import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
+
 //java.util.regex.Pattern 연습
 public class RegexTest {
 
@@ -68,5 +70,35 @@ public class RegexTest {
         System.out.println("result = " + result);
     }
 
-    //username, email, fullname
+    @Test
+    //fullname : 영어, 한글, 1-20
+    public void account_gubun_테스트1() throws Exception{
+        String gubun = "DEPOSIT";
+        boolean result = Pattern.matches("^(DEPOSIT)$", gubun);
+        System.out.println("result = " + result);
+    }
+
+    @Test
+    //fullname : 영어, 한글, 1-20
+    public void account_gubun_테스트2() throws Exception{
+        String gubun = "TRANSFER";
+        boolean result = Pattern.matches("^(DEPOSIT|TRANSFER)$", gubun);
+        System.out.println("result = " + result);
+    }
+
+    @Test
+    //fullname : 영어, 한글, 1-20
+    public void account_tel_테스트1() throws Exception{
+        String tel = "010-1234-5678";
+        boolean result = Pattern.matches("^[0-9]{3}-[0-9]{4}-[0-9]{4}", tel);
+        System.out.println("result = " + result);
+    }
+
+    @Test
+    //fullname : 영어, 한글, 1-20
+    public void account_tel_테스트2() throws Exception{
+        String tel = "01012345678";
+        boolean result = Pattern.matches("^[0-9]{11}", tel);
+        System.out.println("result = " + result);
+    }
 }

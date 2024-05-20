@@ -10,7 +10,7 @@ import shop.mtcoding.bank.domain.user.UserRepository;
 @Configuration
 public class DummyDevInit extends DummyObject{
 
-    @Profile("dev") //prod 모드에서는 실행되면 안됨
+    @Profile("dev") //dev 모드에서 실행. prod 모드에서는 실행되면 안됨
     @Bean
     CommandLineRunner init(UserRepository userRepository){
         return (args) -> {

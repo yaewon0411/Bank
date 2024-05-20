@@ -1,6 +1,7 @@
 package shop.mtcoding.bank.config.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.TransactionScoped;
 import org.hibernate.sql.results.jdbc.internal.ResultSetAccess;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 import shop.mtcoding.bank.config.auth.LoginUser;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserEnum;
