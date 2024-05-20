@@ -71,3 +71,12 @@ private String fullName;
   - 로그인된 사용자만 사용할 수 있는 기능 테스트 시 사용
   - UserDetailsService가 구현하는 객체가 있는지 DB에서 조회하고, 있다면 그 객체를 시큐티리 세션에 담아준다
   - 만약 BeforeEach로 DB에 값을 세팅해주고 있다면, setupBefore = TestExecutionEvent.TEST_EXECUTION를 설정해서 BeforeEach를 통한 셋업이 수행된 후에 @WithUserDetails가 동작하게 해줘야 함
+### 명시적으로 파라미터 이름 지정 (@PathVariable)
+  - Name for argument of type [java.lang.Long] not specified, and parameter name information not available via reflection : 메서드 인자의 이름을 찾을 수 없다는 에러
+  - @PathVariable에서 파라미터 이름을 명시적으로 지정 안해서 발생. Spring은 메서드 호출 시 리플렉션을 통해 파라미터 이름을 사용해 인자를 매핑함. 만약 컴파일 시 파라미터 이름이 보존되지 않으면 기본적으로, arg0이나 arg1같은 이름을 사용함
+  - 프로젝트 컴파일 설정에 -parameters 플래그를 추가해서 플러그인 설정을 바꿀 수도 있음
+    ```java
+    tasks.withType(JavaCompile) {
+      options.compilerArgs << "-parameters"
+    }
+    ```

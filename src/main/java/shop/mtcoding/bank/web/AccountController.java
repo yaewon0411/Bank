@@ -6,18 +6,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import shop.mtcoding.bank.config.auth.LoginUser;
 import shop.mtcoding.bank.dto.ResponseDto;
-import shop.mtcoding.bank.dto.account.AccountReqDto;
-import shop.mtcoding.bank.dto.account.AccountRespDto;
 import shop.mtcoding.bank.service.AccountService;
-
 import static shop.mtcoding.bank.dto.account.AccountReqDto.*;
 import static shop.mtcoding.bank.dto.account.AccountRespDto.*;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -31,5 +26,21 @@ public class AccountController {
                                          @AuthenticationPrincipal LoginUser loginUser) {
         AccountSaveRespDto accountSaveRespDto = accountService.accountRegister(accountSaveReqDto, loginUser.getUser().getId());
         return new ResponseEntity<>(new ResponseDto<>(1, "계좌 등록 성공", accountSaveRespDto), HttpStatus.CREATED);
+    }
+
+    // 인증이 필요하고 account 테이블에 1번 row를 주세요!!
+    // cos로 로그인을 헀는데, cos의 id가 2번. 이 상태로 1번 row달라고 요청하면 안되니까 한번 검증하는 게 필요!! -> 권한 처리 하는게 귀찮
+    // 인증이 필요하고, account 테이블에 login한 유저의 계좌만 주세요
+    @GetMapping("/s/account/login-user")
+    public ResponseEntity<?> findUserAccount(@AuthenticationPrincipal LoginUser loginUser){
+
+        AccountListRespDto accountListRespDto = accountService.getAccountList(loginUser.getUser().getId());
+        return new ResponseEntity<>(new ResponseDto<>(1, "유저별 계좌 목록 보기 성공", accountListRespDto),HttpStatus.OK);
+    }
+
+    @DeleteMapping("/s/account/{number}")
+    public ResponseEntity<?> deleteAccount(@PathVariable(name = "number") Long number, @AuthenticationPrincipal LoginUser loginUser){
+        accountService.deleteAccount(number, loginUser.getUser().getId());
+        return new ResponseEntity<>(new ResponseDto<>(1, "계좌 삭제 완료", null),HttpStatus.OK);
     }
 }

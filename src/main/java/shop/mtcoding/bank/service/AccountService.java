@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static shop.mtcoding.bank.dto.account.AccountRespDto.*;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -29,8 +31,8 @@ public class AccountService {
     private final UserRepository userRepository;
 
     @Transactional
-    public AccountSaveRespDto accountRegister(AccountRespDto.AccountSaveReqDto accountSaveReqDto, Long userId){
-        //User가 db에 있는지 검증. 유저 엔티티 가져오기
+    public AccountSaveRespDto accountRegister(AccountSaveReqDto accountSaveReqDto, Long userId){
+        //User가 db에 있는지 검증. 유저 엔티티 가져오기 (PS는 persist의 약자)
         User userPS = userRepository.findById(userId).orElseThrow(
                 () -> new CustomApiException("유저를 찾을 수 없습니다")
         );
@@ -57,28 +59,19 @@ public class AccountService {
         return new AccountListRespDto(accountListPS, userPS);
     }
 
-    @Data
-    public static class AccountListRespDto{
-        private List<AccountDto> accounts = new ArrayList<>();
-        private String fullname;
+    @Transactional
+    public void deleteAccount(Long number, Long userId){
+        // 1. 계좌 확인
+        Account accountPS = accountRepository.findByNumber(number).orElseThrow(
+                () -> new CustomApiException("계좌를 찾을 수 없습니다")
+        );
+        //2. 계좌 소유자 확인
+        accountPS.checkOwner(userId);
 
-        public AccountListRespDto(List<Account> accounts, User user) {
-            this.accounts = accounts.stream().map(AccountDto::new).collect(Collectors.toList());
-            this.fullname = user.getFullname();
-        }
-        @Data
-        public class AccountDto{
-            private Long id;
-            private Long number;
-            private Long balance;
-
-            public AccountDto(Account account) {
-                this.id = account.getId();
-                this.number = account.getNumber();
-                this.balance = account.getBalance();
-            }
-        }
+        //3. 계좌 삭제
+        accountRepository.deleteById(accountPS.getId());
     }
+
 
 
 

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.cassandra.DataCassandraTest;
@@ -17,10 +18,17 @@ import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto;
+import shop.mtcoding.bank.dto.account.AccountRespDto.AccountListRespDto.AccountDto;
+import shop.mtcoding.bank.ex.CustomApiException;
 
+import javax.swing.text.html.Option;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static shop.mtcoding.bank.dto.account.AccountReqDto.*;
@@ -67,5 +75,43 @@ public class AccountServiceTest extends DummyObject {
 
         assertThat(accountSaveRespDto.getNumber()).isEqualTo(1111L);
 
+    }
+    @Test
+    public void 본인계좌목록보기테스트 () throws Exception{
+        Long userId = 1L;
+
+        //stub 1 : userRepository에서 userId조회
+        User user = newMockUser(userId, "ssar","쌀");
+        when(userRepository.findById(any())).thenReturn(Optional.of(user));
+
+        //stub 2 : 계좌 목록 생성 후 userId로 조회
+        Account a1 = newMockAccount(1L, 111L, 1111L, user);
+        Account a2 = newMockAccount(2L, 222L, 2222L, user);
+        List<Account> accounts = Arrays.asList(a1, a2);
+
+        when(accountRepository.findByUser_id(userId)).thenReturn(accounts);
+
+        AccountListRespDto accountListRespDto = accountService.getAccountList(userId);
+        String response = om.writeValueAsString(accountListRespDto);
+        System.out.println("response = " + response);
+
+
+        assertThat(accountListRespDto.getFullname()).isEqualTo(user.getFullname());
+        assertThat(accountListRespDto.getAccounts().size()).isEqualTo(2);
+
+    }
+    @Test
+    public void 계좌삭제테스트() throws Exception{
+        //given
+        Long number = 1111L;
+        Long userId = 2L;
+
+        //stub
+        User ssar = newMockUser(1L, "ssar","쌀");
+        Account ssarAccount = newMockAccount(1L, 1000L, 1111L, ssar);
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(ssarAccount));
+
+        //when
+        assertThrows(CustomApiException.class, () -> accountService.deleteAccount(number, userId));
     }
 }
