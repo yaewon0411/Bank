@@ -148,9 +148,9 @@ public class AccountControllerTest extends DummyObject {
     @Test
     public void 계좌입급_test() throws Exception{
         //given
-        AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto(1111L, 10000L, "DEPOSIT","01088403980");
+        AccountDepositReqDto accountDepositReqDto =
+                new AccountDepositReqDto(1111L, 10000L, "DEPOSIT","01088403980");
         String requestBody = om.writeValueAsString(accountDepositReqDto);
-        System.out.println("requestBody = " + requestBody);
 
         //when
         ResultActions resultActions = mvc.perform(post("/api/account/deposit")
@@ -159,9 +159,11 @@ public class AccountControllerTest extends DummyObject {
 
         String responseBody = resultActions.andReturn
                 ().getResponse().getContentAsString();
-        System.out.println("responseBody = " + responseBody);
+        //System.out.println("responseBody = " + responseBody);
 
         //then
+        resultActions.andExpect(status().isCreated());
+        resultActions.andExpect(jsonPath("$.msg").value("계좌 입금 완료"));
     }
 
 }

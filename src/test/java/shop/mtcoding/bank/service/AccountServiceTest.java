@@ -124,32 +124,23 @@ public class AccountServiceTest extends DummyObject {
         assertThrows(CustomApiException.class, () -> accountService.deleteAccount(number, userId));
     }
 
+    // Account -> balance 변경됐는지
+    // Transaction -> balance 잘 기록했는지
     @Test
     public void 계좌입금_test() throws Exception{
         //given
-        AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto(1111L, 1000L, "DEPOSIT", "01001234567");
-        User user = newMockUser(1L, "ssar","쌀");
-        Account account = newMockAccount(1L, 100L, 1111L, user);
+        AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto(1111L, 100L, "DEPOSIT", "01001234567");
 
         //stub 1
-        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(account));
+        User user = newMockUser(1L, "ssar","쌀");//실행됨
+        Account account = newMockAccount(1L, 1000L, 1111L, user);//실행됨 - 1000원
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(account)); //실행안됨 -> service 호출 후 실행됨 -> 1100원이 됨
 
 
-        //stub 2
-        Transaction transaction = Transaction.builder()
-                .depositAccount(account)
-                .withdrawAccount(null)
-                .depositAccountBalance(account.getBalance()+accountDepositReqDto.getAmount())
-                .withdrawAccount(null)
-                .amount(accountDepositReqDto.getAmount())
-                .gubun(TransactionEnum.DEPOSIT)
-                .sender("ATM")
-                .createdAt(LocalDateTime.now()) //createdAt에 걸린 이벤트는 실제 db에 insert될 때 작동하는 거라서, mock으로 테스트할 때 직접 지정해줘야함
-                .receiver(accountDepositReqDto.getNumber()+"")
-                .tel(accountDepositReqDto.getTel())
-                .build();
-
-        when(transactionRepository.save(any())).thenReturn(transaction);
+        //stub 2 (서비스 테스트는 스텁이 진행될 때마다 연관된 객체는 새로 만들어서 주입해야 함 -> 타이밍 때문에 꼬인다!!
+        Account account2 = newMockAccount(1L, 1000L, 1111L, user);
+        Transaction transaction = newMockDepositTransaction(1L, account2); //실행됨 -> 1100원
+        when(transactionRepository.save(any())).thenReturn(transaction); //실행안됨
 
         AccountDepositRespDto accountDepositRespDto = accountService.depositAccount(accountDepositReqDto);
         String responseBody = om.writeValueAsString(accountDepositRespDto);
@@ -159,4 +150,59 @@ public class AccountServiceTest extends DummyObject {
         assertThat(accountDepositRespDto.getNumber()).isEqualTo(account.getNumber());
         assertThat(accountDepositRespDto.getTransaction().getDepositAccountBalance()).isEqualTo(account.getBalance());
     }
+
+    @Test
+    public void 계좌입금_test2() throws Exception{
+        //given
+        AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto(1111L, 100L, "DEPOSIT", "01001234567");
+
+        //stub 1
+        User user = newMockUser(1L, "ssar","쌀");//실행됨
+        Account account = newMockAccount(1L, 1000L, 1111L, user);//실행됨 - 1000원
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(account)); //실행안됨 -> service 호출 후 실행됨 -> 1100원이 됨
+
+        //stub 2 (서비스 테스트는 스텁이 진행될 때마다 연관된 객체는 새로 만들어서 주입해야 함 -> 타이밍 때문에 꼬인다!!
+        User user2 = newMockUser(1L, "ssar","쌀");
+        Account account2 = newMockAccount(1L, 1000L, 1111L, user2);
+        Transaction transaction = newMockDepositTransaction(1L, account2); //실행됨 -> 1100원
+        when(transactionRepository.save(any())).thenReturn(transaction); //실행안됨
+
+
+        //when
+        AccountDepositRespDto accountDepositRespDto = accountService.depositAccount(accountDepositReqDto);
+
+        //then
+        String responseBody = om.writeValueAsString(accountDepositRespDto);
+        System.out.println("responseBody = " + responseBody);
+
+    }
+
+    // 서비스 테스트를 보여준 건, 기술적이 테크닉을 보여준거뿐!!
+    // 진짜 서비스를 테스트 하고 싶으면, 내가 지금 무엇을 여기서 테스트해야 할지 명확히 구분 필요(책임 분리)
+    // DTO를 만드는 책임 -> 서비스에 있지만 !! (Controller 테스트 해볼 것이니까 서비스에서 DTO 검증 안할 수 있음!!)
+    // DB 관련된 것도 -> 실제로는 서비스 것이 아니니까... 볼필요없어
+    // DB 관련된 것을 조회했을 때, 그 값을 통해서 어떤 비즈니스 로직이 흘러가는 것이 있으면, 그리고 그걸 검증하는 게 중요하다면 -> stub으로 검증하면 됨
+
+    // 계좌 입금 테스트에서 DB 스텁 2개 만들어서 deposit 검증하고 0 검증하고... -> 진짜 필요한가 생각해야 함
+    @Test
+    public void 계좌입금_test3() throws Exception{
+        //given
+        Account account = newMockAccount(1L,1000L,1111L, null);
+        Long amount = 0L;
+
+        //when
+        if(amount<=0L){
+            throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다");
+        }
+        account.deposit(100L);
+
+        //then
+        assertThat(account.getBalance()).isEqualTo(1100L);
+    }
+
+    //계좌 출금_테스트
+
+    //계좌 이체_테스트
+
+    //계좌 상세보기_테스트
 }

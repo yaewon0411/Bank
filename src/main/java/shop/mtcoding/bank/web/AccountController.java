@@ -47,6 +47,6 @@ public class AccountController {
     @PostMapping("/account/deposit")
     public ResponseEntity<?> depositAccount(@RequestBody @Valid AccountDepositReqDto accountDepositReqDto, BindingResult bindingResult){
         AccountDepositRespDto accountDepositRespDto = accountService.depositAccount(accountDepositReqDto);
-        return new ResponseEntity<>(new ResponseDto<>(1, "계좌 입금 완료",accountDepositRespDto),HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(1, "계좌 입금 완료",accountDepositRespDto),HttpStatus.CREATED);
     }
 }
