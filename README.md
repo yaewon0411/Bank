@@ -80,3 +80,8 @@ private String fullName;
       options.compilerArgs << "-parameters"
     }
     ```
+### JSON 라이브러리와 기본 생성자
+  - JSON 라이브러리(ex. Jackson)는 객체를 역직렬화할 때 기본 생성자를 사용 (라이브러리가 먼저 빈 객체 생성 후 -> JSON 데이터 파싱)
+  - 매개변수를 받는 생성자가 정의된 경우, 컴파일러가 기본 생성자를 자동으로 추가하지 않기 때문에, JSON 라이브러리가 클래스의 인스턴스를 자동으로 생성할 수 없게 됨.
+    - AccountDepositReqDto 클래스에 매개변수 받는 생성자만 정의하고 기본 생성자 정의 안했어서 Type definition error: [simple type, class shop.mtcoding.bank.dto.account.AccountReqDto$AccountDepositReqDto] 발생했음 => 기본 생성자 달아서 해결
+  

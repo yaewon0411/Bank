@@ -1,6 +1,6 @@
 package shop.mtcoding.bank.web;
 
-import ch.qos.logback.core.encoder.EchoEncoder;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,12 +16,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.annotation.Transactional;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
+import shop.mtcoding.bank.dto.account.AccountReqDto;
+import shop.mtcoding.bank.dto.account.AccountReqDto.AccountDepositReqDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto;
 import shop.mtcoding.bank.ex.CustomApiException;
 import shop.mtcoding.bank.service.AccountService;
@@ -142,6 +143,25 @@ public class AccountControllerTest extends DummyObject {
         assertThrows(CustomApiException.class, () -> accountRepository.findByNumber(number).orElseThrow(
                 () -> new CustomApiException("계좌를 찾을 수 없습니다")
         ));
+    }
+
+    @Test
+    public void 계좌입급_test() throws Exception{
+        //given
+        AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto(1111L, 10000L, "DEPOSIT","01088403980");
+        String requestBody = om.writeValueAsString(accountDepositReqDto);
+        System.out.println("requestBody = " + requestBody);
+
+        //when
+        ResultActions resultActions = mvc.perform(post("/api/account/deposit")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        String responseBody = resultActions.andReturn
+                ().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+
+        //then
     }
 
 }

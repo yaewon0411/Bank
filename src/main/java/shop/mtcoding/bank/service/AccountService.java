@@ -19,6 +19,7 @@ import shop.mtcoding.bank.domain.transaction.TransactionRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto;
+import shop.mtcoding.bank.dto.account.AccountReqDto.AccountDepositReqDto;
 import shop.mtcoding.bank.dto.account.AccountReqDto.AccountSaveRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto;
 import shop.mtcoding.bank.ex.CustomApiException;
@@ -116,60 +117,9 @@ public class AccountService {
         return new AccountDepositRespDto(depositAccountPS, transactionPS);
     }
 
-    @Data
-    public static class AccountDepositRespDto{
-        private Long id; //계좌 id
-        private Long number; //계좌 번호
-        private TransactionDto transaction;
 
-        public AccountDepositRespDto(Account account, Transaction transaction) {
-            this.id = account.getId();
-            this.number = account.getNumber();
-            this.transaction = new TransactionDto(transaction);
-        }
 
-        @Data
-        public class TransactionDto{
-            private Long id;
-            private String gubun;
-            private String sender;
-            private String receiver;
-            private Long amount;
-            @JsonIgnore
-            private Long depositAccountBalance; // 클라이언트에게 전달 x -> 서비스단에서 테스트 용도
-            private String tel;
-            private String createdAt;
 
-            public TransactionDto(Transaction transaction) {
-                this.id = transaction.getId();
-                this.gubun = transaction.getGubun().getValue();
-                this.sender = transaction.getSender();
-                this.receiver = transaction.getReceiver();
-                this.amount = transaction.getAmount();
-                this.depositAccountBalance = transaction.getDepositAccountBalance();
-                this.tel = transaction.getTel();
-                this.createdAt = CustomDateUtil.toStringFormat(transaction.getCreatedAt());
-            }
-        }
-    }
-
-    @Data
-    public static class AccountDepositReqDto{
-        @NotNull
-        @Digits(integer = 4, fraction = 4)
-        private Long number;
-
-        @NotNull
-        private Long amount; //여기서 0원 유효성 검사해도 됨
-
-        @NotEmpty
-        @Pattern(regexp = "^(DEPOSIT)$")
-        private String gubun; //DEPOSIT
-
-        @NotEmpty
-        @Pattern(regexp = "^[0-9]{11}") //010-0000-0000
-        private String tel;
-    }
 
 
 
