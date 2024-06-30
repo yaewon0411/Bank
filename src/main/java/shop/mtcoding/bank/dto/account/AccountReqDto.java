@@ -7,8 +7,27 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import shop.mtcoding.bank.domain.account.Account;
+import shop.mtcoding.bank.domain.user.User;
 
 public class AccountReqDto {
+
+    @Data
+    public static class AccountWithdrawReqDto{
+        @NotNull
+        @Digits(integer = 4, fraction = 4)
+        private Long number;
+
+        @NotNull
+        @Digits(integer=4, fraction=4)
+        private Long password;
+
+        @NotNull
+        private Long amount;
+
+        @NotEmpty
+        @Pattern(regexp = "^(WITHDRAW)$")
+        private String gubun;
+    }
 
     @Data
     @NoArgsConstructor
@@ -37,15 +56,24 @@ public class AccountReqDto {
     }
 
     @Data
-    public static class AccountSaveRespDto{
-        private Long id;
+    public static class AccountSaveReqDto{
+        @NotNull
+        @Digits(integer = 4, fraction = 4) //최대 4자
         private Long number;
-        private Long balance;
 
-        public AccountSaveRespDto(Account account) {
-            id = account.getId();
-            number = account.getNumber();
-            balance = account.getBalance();
+        @NotNull
+        @Digits(integer = 4, fraction = 4) //최대 4자
+        private Long password;
+
+        public Account toEntity(User user){
+            return Account.builder()
+                    .number(number)
+                    .password(password)
+                    .balance(1000L)
+                    .user(user)
+                    .build();
         }
     }
+
+
 }

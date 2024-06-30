@@ -15,6 +15,41 @@ import java.util.stream.Collectors;
 
 public class AccountRespDto {
 
+    // DTO가 똑같아도 재사용하지 말기 (나중에 만약 출금할 때 먼가 DTO가 조금 달라져야 하면 모든 애들이 한꺼번에 수정되어야 함)
+    @Data
+    public static class AccountWithdrawRespDto{
+        private Long id; //계좌 id
+        private Long number; //계좌 번호
+        private TransactionDto transaction;
+        private Long balance; //잔액
+
+        public AccountWithdrawRespDto(Account account, Transaction transaction) {
+            this.id = account.getId();
+            this.number = account.getNumber();
+            this.transaction = new TransactionDto(transaction);
+            this.balance = account.getBalance();
+        }
+
+        @Data
+        public class TransactionDto{
+            private Long id;
+            private String gubun;
+            private String sender;
+            private String receiver;
+            private Long amount;
+            private String createdAt;
+
+            public TransactionDto(Transaction transaction) {
+                this.id = transaction.getId();
+                this.gubun = transaction.getGubun().getValue();
+                this.sender = transaction.getSender();
+                this.receiver = transaction.getReceiver();
+                this.amount = transaction.getAmount();
+                this.createdAt = CustomDateUtil.toStringFormat(transaction.getCreatedAt());
+            }
+        }
+    }
+
     @Data
     public static class AccountDepositRespDto{
         private Long id; //계좌 id
@@ -36,7 +71,7 @@ public class AccountRespDto {
             private Long amount;
             private String tel;
             private String createdAt;
-            //@JsonIgnore
+            @JsonIgnore
             private Long depositAccountBalance; // 클라이언트에게 전달 x -> 서비스단에서 테스트 용도
 
 
@@ -53,23 +88,18 @@ public class AccountRespDto {
         }
     }
 
+
+
     @Data
-    public static class AccountSaveReqDto{
-        @NotNull
-        @Digits(integer = 4, fraction = 4) //최대 4자
+    public static class AccountSaveRespDto{
+        private Long id;
         private Long number;
+        private Long balance;
 
-        @NotNull
-        @Digits(integer = 4, fraction = 4) //최대 4자
-        private Long password;
-
-        public Account toEntity(User user){
-            return Account.builder()
-                    .number(number)
-                    .password(password)
-                    .balance(1000L)
-                    .user(user)
-                    .build();
+        public AccountSaveRespDto(Account account) {
+            id = account.getId();
+            number = account.getNumber();
+            balance = account.getBalance();
         }
     }
     @Data

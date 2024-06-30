@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static shop.mtcoding.bank.dto.account.AccountReqDto.*;
 import static shop.mtcoding.bank.dto.account.AccountRespDto.*;
 
 @Sql("classpath:db/teadown.sql") //실행 시점 : BeforeEach 실행 직전마다!!

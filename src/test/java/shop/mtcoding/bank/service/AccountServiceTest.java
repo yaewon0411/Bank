@@ -54,7 +54,7 @@ public class AccountServiceTest extends DummyObject {
     @Mock
     private UserRepository userRepository;
 
-    @Spy //진짜 객체를 InjectMocks에 주입한다
+    @Spy //진짜 객체를 InjectMocks에 주입한다. om의 메서드 호출 결과를 Mockito를 사용해 조적하려면 @Spy를 달아야 함. 만약 굳이 Mockito로 호출 결과를 조작(when())할 필요 없으면 @Spy 안달아도 됨
     private ObjectMapper om;
     @Test
     public void 계좌등록_test() throws Exception{     //stub 3개 필요함 (Repository의 findById랑 findByNumber, save)
@@ -74,6 +74,8 @@ public class AccountServiceTest extends DummyObject {
         //stub 3
         Account ssarAccount = newMockAccount(1L, 1000L,1111L, ssar);
         when(accountRepository.save(any())).thenReturn(ssarAccount);
+
+
 
 
         //when
@@ -182,6 +184,8 @@ public class AccountServiceTest extends DummyObject {
     // DTO를 만드는 책임 -> 서비스에 있지만 !! (Controller 테스트 해볼 것이니까 서비스에서 DTO 검증 안할 수 있음!!)
     // DB 관련된 것도 -> 실제로는 서비스 것이 아니니까... 볼필요없어
     // DB 관련된 것을 조회했을 때, 그 값을 통해서 어떤 비즈니스 로직이 흘러가는 것이 있으면, 그리고 그걸 검증하는 게 중요하다면 -> stub으로 검증하면 됨
+
+    // 팀장이 맞춤형 설문지를 만들 때, DB 스텁 만들어서 질문 목록들 다 스텁에 넣고, 검증하고, 넣고 ...-> 진짜 필요한가 생각해야 함
 
     // 계좌 입금 테스트에서 DB 스텁 2개 만들어서 deposit 검증하고 0 검증하고... -> 진짜 필요한가 생각해야 함
     @Test
