@@ -27,6 +27,8 @@ import shop.mtcoding.bank.dto.account.AccountRespDto;
 import shop.mtcoding.bank.ex.CustomApiException;
 import shop.mtcoding.bank.service.AccountService;
 
+import javax.xml.transform.Result;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -165,6 +167,55 @@ public class AccountControllerTest extends DummyObject {
         //then
         resultActions.andExpect(status().isCreated());
         resultActions.andExpect(jsonPath("$.msg").value("계좌 입금 완료"));
+    }
+
+    @Test
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    public void withdraw_test() throws Exception{
+        //given
+        AccountWithdrawReqDto accountWithdrawReqDto = new AccountWithdrawReqDto();
+        accountWithdrawReqDto.setGubun("WITHDRAW");
+        accountWithdrawReqDto.setAmount(100L);
+        accountWithdrawReqDto.setPassword(1234L);
+        accountWithdrawReqDto.setNumber(1111L);
+
+        String requestBody = om.writeValueAsString(accountWithdrawReqDto);
+        System.out.println("requestBody = " + requestBody);
+
+        //when
+        ResultActions resultActions = mvc.perform(post("/api/s/account/withdraw")
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+        //then
+
+    }
+
+    @Test
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    public void transfer_test() throws Exception{
+        //given
+        AccountTransferReqDto accountTransferReqDto = new AccountTransferReqDto();
+        accountTransferReqDto.setAmount(100L);
+        accountTransferReqDto.setGubun("TRANSFER");
+        accountTransferReqDto.setWithdrawNumber(1111L);
+        accountTransferReqDto.setDepositNumber(2222L);
+        accountTransferReqDto.setWithdrawPassword(1234L);
+
+        String requestBody = om.writeValueAsString(accountTransferReqDto);
+        System.out.println("requestBody = " + requestBody);
+
+        //when
+        ResultActions resultActions = mvc.perform(post("/api/s/account/transfer")
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+        //then
+
     }
 
 }

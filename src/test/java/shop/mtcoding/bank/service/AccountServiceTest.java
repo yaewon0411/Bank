@@ -11,6 +11,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.cassandra.DataCassandraTest;
+import org.springframework.security.test.context.support.TestExecutionEvent;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.account.Account;
@@ -27,10 +29,7 @@ import shop.mtcoding.bank.ex.CustomApiException;
 
 import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -74,8 +73,6 @@ public class AccountServiceTest extends DummyObject {
         //stub 3
         Account ssarAccount = newMockAccount(1L, 1000L,1111L, ssar);
         when(accountRepository.save(any())).thenReturn(ssarAccount);
-
-
 
 
         //when
@@ -205,8 +202,140 @@ public class AccountServiceTest extends DummyObject {
     }
 
     //계좌 출금_테스트
+    @Test
+    public void 계좌출금테스트() throws Exception{
+        //given
+        Long amount = 100L;
+        Long password = 1234L;
+        Long userId = 1L;
+
+        User ssar = newMockUser(1L, "ssar", "쌀");
+        Account ssarAccount = newMockAccount(1L, 1000L, 1000L, ssar);
+
+        //when
+        // 0원 체크
+        if(amount <=0L){
+            throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다");
+        }
+        //출금 소유자 확인
+        ssarAccount.checkOwner(userId);
+
+        //계좌 비밀번호 확인
+        ssarAccount.checkPassword(password);
+
+        //잔액 확인 & 출금
+        ssarAccount.withdraw(amount);
+
+        //then
+        assertThat(ssarAccount.getBalance()).isEqualTo(900L);
+    }
 
     //계좌 이체_테스트
+    @Test
+    public void 계좌이체_test() throws  Exception{
+        //given
+        Long userId = 1L;
+        AccountTransferReqDto accountTransferReqDto = new AccountTransferReqDto();
+        accountTransferReqDto.setAmount(100L);
+        accountTransferReqDto.setGubun("TRANSFER");
+        accountTransferReqDto.setWithdrawNumber(1111L);
+        accountTransferReqDto.setDepositNumber(2222L);
+        accountTransferReqDto.setWithdrawPassword(1234L);
+
+        User withdrawUser = newMockUser(userId, "ssar","쌀");
+
+        Account withdrawAccountPS = newMockAccount(1L, 1000L, 1111L, withdrawUser);
+        Account depositAccountPS = newMockAccount(2L, 1000L, 2222L, null);
+
+
+        //when
+        //출금 계좌와 입금 계좌가 동일하면 안됨
+        if(accountTransferReqDto.getWithdrawNumber().equals(accountTransferReqDto.getDepositNumber()))
+            throw new CustomApiException("출금 계좌와 입금 계좌는 동일할 수 없습니다");
+
+        //0원 체크
+        if(accountTransferReqDto.getAmount() <= 0L)
+            throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다");
+
+        //출금 소유자 확인
+        withdrawAccountPS.checkOwner(userId);
+
+        //출금 계좌 비번 확인
+        withdrawAccountPS.checkPassword(accountTransferReqDto.getWithdrawPassword());
+
+        //이체하기
+        withdrawAccountPS.withdraw(accountTransferReqDto.getAmount());
+        depositAccountPS.deposit(accountTransferReqDto.getAmount());
+
+        //then
+        assertThat(withdrawAccountPS.getBalance()).isEqualTo(900L);
+        assertThat(depositAccountPS.getBalance()).isEqualTo(1100L);
+    }
+
+    @Test
+    public void 계좌이체_test2() throws Exception{
+        //when
+        AccountTransferReqDto accountTransferReqDto = new AccountTransferReqDto();
+        accountTransferReqDto.setAmount(100L);
+        accountTransferReqDto.setGubun("TRANSFER");
+        accountTransferReqDto.setWithdrawNumber(1111L);
+        accountTransferReqDto.setDepositNumber(2222L);
+        accountTransferReqDto.setWithdrawPassword(1234L);
+
+        User withdrawUser = newMockUser(1L, "ssar","쌀");
+        User depositUser = newMockUser(2L, "cos","코스");
+
+        Account withdrawAccountPS = newMockAccount(1L, 1000L, 1111L, withdrawUser);
+        Account depositAccountPS = newMockAccount(2L, 1000L, 2222L, depositUser);
+
+        //출금 계좌와 입금 계좌가 동일하면 안됨
+        if(accountTransferReqDto.getWithdrawNumber().equals(accountTransferReqDto.getDepositNumber()))
+            throw new CustomApiException("출금 계좌와 입금 계좌는 동일할 수 없습니다");
+
+        //0원 체크
+        if(accountTransferReqDto.getAmount() <= 0L)
+            throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다");
+
+        //stub1 - 출금 계좌 확인
+        when(accountRepository.findByNumber(withdrawAccountPS.getNumber())).thenReturn(Optional.of(withdrawAccountPS));
+
+        //stub2 - 입금 계좌 확인
+        when(accountRepository.findByNumber(depositAccountPS.getNumber())).thenReturn(Optional.of(depositAccountPS));
+
+        //출금 소유자 확인
+        withdrawAccountPS.checkOwner(withdrawUser.getId());
+
+        //출금 계좌번호 확인
+        withdrawAccountPS.checkPassword(accountTransferReqDto.getWithdrawPassword());
+
+        //이체하기
+        withdrawAccountPS.withdraw(accountTransferReqDto.getAmount());
+        depositAccountPS.deposit(accountTransferReqDto.getAmount());
+
+        //거래내역 남기기(출금 계좌에서 입금 계좌로)
+        Transaction transaction = Transaction.builder()
+                .withdrawAccount(withdrawAccountPS)
+                .depositAccount(depositAccountPS)
+                .withdrawAccountBalance(withdrawAccountPS.getBalance())
+                .depositAccountBalance(depositAccountPS.getBalance())
+                .amount(accountTransferReqDto.getAmount())
+                .gubun(TransactionEnum.TRANSFER)
+                .sender(accountTransferReqDto.getWithdrawNumber()+"")
+                .receiver(accountTransferReqDto.getDepositNumber()+"")
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        when(transactionRepository.save(any())).thenReturn(transaction);
+
+        //then
+        assertThat(withdrawAccountPS.getBalance()).isEqualTo(900L);
+        assertThat(depositAccountPS.getBalance()).isEqualTo(1100L);
+
+        AccountTransferRespDto accountTransferRespDto = accountService.transferAccount(accountTransferReqDto, withdrawUser.getId());
+        String responseBody = om.writeValueAsString(accountTransferRespDto);
+        System.out.println("responseBody = " + responseBody);
+
+    }
 
     //계좌 상세보기_테스트
 }

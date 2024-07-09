@@ -3,6 +3,7 @@ package shop.mtcoding.bank.dto.account;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
+import jdk.jfr.DataAmount;
 import lombok.Data;
 import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.transaction.Transaction;
@@ -14,6 +15,43 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class AccountRespDto {
+
+    @Data
+    public static class AccountTransferRespDto{
+        private Long id; //계좌 id
+        private Long number; //계좌 번호
+        private TransactionDto transaction;
+        private Long balance; //출금 계좌 잔액
+
+        public AccountTransferRespDto(Account account, Transaction transaction) {
+            this.id = account.getId();
+            this.number = account.getNumber();
+            this.transaction = new TransactionDto(transaction);
+            this.balance = account.getBalance();
+        }
+
+        @Data
+        public class TransactionDto{
+            private Long id;
+            private String gubun;
+            private String sender;
+            private String receiver;
+            private Long amount;
+            @JsonIgnore
+            private Long depositAccountBalance;
+            private String createdAt;
+
+            public TransactionDto(Transaction transaction) {
+                this.id = transaction.getId();
+                this.gubun = transaction.getGubun().getValue();
+                this.sender = transaction.getSender();
+                this.receiver = transaction.getReceiver();
+                this.amount = transaction.getAmount();
+                this.depositAccountBalance = transaction.getDepositAccountBalance();
+                this.createdAt = CustomDateUtil.toStringFormat(transaction.getCreatedAt());
+            }
+        }
+    }
 
     // DTO가 똑같아도 재사용하지 말기 (나중에 만약 출금할 때 먼가 DTO가 조금 달라져야 하면 모든 애들이 한꺼번에 수정되어야 함)
     @Data
