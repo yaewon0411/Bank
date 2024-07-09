@@ -230,11 +230,15 @@ public class AccountServiceTest extends DummyObject {
         assertThat(ssarAccount.getBalance()).isEqualTo(900L);
     }
 
+    //완벽한 테스트는 존재할 수 없다
+    //유저 아이디가 127L을 넘어서면 현재 checkOwner에서 this.user.getId() != userId 로 계좌 소유자를 검증하고 있는 것에
+    //계속 실패하게 된다
+    //따라서 항상 Long 값 비교는 longValue 혹은 equals로 비교하도록 한다!!!
     //계좌 이체_테스트
     @Test
     public void 계좌이체_test() throws  Exception{
         //given
-        Long userId = 1L;
+        Long userId = 1000L;
         AccountTransferReqDto accountTransferReqDto = new AccountTransferReqDto();
         accountTransferReqDto.setAmount(100L);
         accountTransferReqDto.setGubun("TRANSFER");
@@ -242,10 +246,11 @@ public class AccountServiceTest extends DummyObject {
         accountTransferReqDto.setDepositNumber(2222L);
         accountTransferReqDto.setWithdrawPassword(1234L);
 
-        User withdrawUser = newMockUser(userId, "ssar","쌀");
+        User ssar = newMockUser(1000L, "ssar","쌀");
+        User cos = newMockUser(2L, "ssar","쌀");
 
-        Account withdrawAccountPS = newMockAccount(1L, 1000L, 1111L, withdrawUser);
-        Account depositAccountPS = newMockAccount(2L, 1000L, 2222L, null);
+        Account withdrawAccountPS = newMockAccount(1L, 1000L, 1111L, ssar);
+        Account depositAccountPS = newMockAccount(2L, 1000L, 2222L, cos);
 
 
         //when

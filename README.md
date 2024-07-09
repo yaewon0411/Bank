@@ -84,4 +84,23 @@ private String fullName;
   - JSON 라이브러리(ex. Jackson)는 객체를 역직렬화할 때 기본 생성자를 사용 (라이브러리가 먼저 빈 객체 생성 후 -> JSON 데이터 파싱)
   - 매개변수를 받는 생성자가 정의된 경우, 컴파일러가 기본 생성자를 자동으로 추가하지 않기 때문에, JSON 라이브러리가 클래스의 인스턴스를 자동으로 생성할 수 없게 됨.
     - AccountDepositReqDto 클래스에 매개변수 받는 생성자만 정의하고 기본 생성자 정의 안했어서 Type definition error: [simple type, class shop.mtcoding.bank.dto.account.AccountReqDto$AccountDepositReqDto] 발생했음 => 기본 생성자 달아서 해결
-  
+
+### Long 타입 비교
+  - Account의 checkOwner과 checkPassword에서 Long타입인 id와 password의 일치 여부를 통해 로직이 흘러간다
+  - 이 때, Long 값의 범위가 -127 ~ 127 사이이면 등호를 통한 값 비교가 정상적으로 수행되나 범위를 넘어서게 되면 등호를 통한 비교가 안된다 -> 이 범위를 넘어서는 유저 비교에는 항상 실패하게 됨
+  - 따라서!! Long 값 비교 시에는 longValue() 또는 equals()를 사용하자
+    ```java
+    public void checkOwner(Long userId){
+        if(this.user.getId().longValue() != userId.longValue()) { //Lazy 로딩이어도 id를 조회할 때는 select 쿼리가 나가지 않는다.
+            throw new CustomApiException("계좌 소유자가 아닙니다");
+        }
+    }
+    ```
+    
+### 프록시 객체와 지연 로딩
+  - Lazy 로딩을 이용해 불러온 프록시 객체에도, 객체의 id(pk)를 조회하는 경우에는 별도의 select 쿼리 발생 X
+  - 이는 id 값이 이미 객체를 참조할 때 필요한 최소 정보로서, 프록시 객체를 생성할 때 함게 로딩되기 때문
+  - 작동 원리
+    - 프록시 객체가 실제 객체의 레퍼런스를 대신해 생성됨
+    - 객체의 id와 같은 PK는 이미 알고 있는 정보이기 때문에, 객체 생성 시 함께 설정됨
+    - 프록시 객체의 속성에 접근할 때 실제 데이터가 필요한 경우에만 해당 객체를 위한 초기화 과정 진행

@@ -2,7 +2,46 @@ package shop.mtcoding.bank.temp;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 public class LongTest {
+
+
+    @Test
+    void LongTest3() throws Exception{
+    //given
+        Long v1 = 1000L;
+        Long v2 = 1000L;
+
+
+    //when
+
+
+    //then
+        assertThat(v1).isEqualTo(v2);
+
+    }
+    
+    @Test
+    void LongTest2() throws Exception{
+    //given
+    Long v1 = 128L;
+    Long v2 = 128L;
+
+    //Long 타입은 값이 작으면 == 비교가 되나, 값이 커지면 등호 비교가 안된다
+    // 2의 8승 256범위 내에서는 (-127 - 127) 등호 비교 되지만
+    // 이 범위를 넘어가면 등호 비교 안됨
+    
+    //when
+    if(v1 == v2){
+        System.out.println("테스트 : 같습니다 ");
+    }
+    
+    //then
+    
+    
+    }
+    
 
     @Test
     public void long_Test() throws  Exception{
