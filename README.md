@@ -104,3 +104,60 @@ private String fullName;
     - 프록시 객체가 실제 객체의 레퍼런스를 대신해 생성됨
     - 객체의 id와 같은 PK는 이미 알고 있는 정보이기 때문에, 객체 생성 시 함께 설정됨
     - 프록시 객체의 속성에 접근할 때 실제 데이터가 필요한 경우에만 해당 객체를 위한 초기화 과정 진행
+
+### CORS 정책: Access-Control-Expose-Headers
+브라우저에서 로그인 후 스크립트를 통해 콘솔에 토큰 값을 찍도록 했는데 null이 떴다<br>
+```java
+    public CorsConfigurationSource configurationSource() {
+
+        log.debug("디버그 : configurationSource cors 설정이 SecurityFilterChain에 등록됨");
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedMethods(Collections.singletonList("*")); //모든 HTTP 메서드(자바스크립트 요청) 허용
+        config.setAllowedHeaders(Collections.singletonList("*")); // 모든 HTTP 헤더 허용
+        config.setAllowCredentials(true); //클라이언트에서 쿠키 요청 허용
+        config.addAllowedOriginPattern("*"); //모든 IP 주소 허용 (프론트엔드 IP만 허용)
+        config.setMaxAge(3600L); //1시간 동안 캐시
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return source;
+    }
+```
+초기 Cors 설정은 위와 같이 되어 있었다<br>
+Cors에는 CORS-safelisted response header(simple response header)라 하여, HTTP 헤더 중 클라이언트 스크립트에 노출되어도 안전하다고 여겨지는 것들이 있다<br>
+```
+Cache-Control
+Content-Language
+Content-Length
+Content-Type
+Expires
+Last-Modified
+Pragma
+```
+가 이에 속하는 헤더들이다.
+즉 Authorization 헤더가 이 simple response header에 속하지 않기 때문에, 별도로 노출시키지 않는 이상 스크립트가 Authorization 헤더에 접근할 수 없는 것이다<br>
+이 때 Access-Control-Expose-Headers를 사용할 수 있다.<br>
+Access-Control-Expose-Headers는 서버가 브라우저의 스크립트에서 접근할 수 있도록 특정 HTTP 헤더들을 명시적으로 허용하기 위해 사용한다<br>
+따라서 스크립트에서 읽을 수 있도록 하고 싶은 헤더들을 이 리스트에 추가하면 된다<br>
+시큐리티에서는 이 설정을 addExposedHeader()를 통해 할 수 있다<br>
+아래 코드처럼 Authorization 헤더를 expose 시켰다
+```java
+    public CorsConfigurationSource configurationSource() {
+
+        log.debug("디버그 : configurationSource cors 설정이 SecurityFilterChain에 등록됨");
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedMethods(Collections.singletonList("*")); //모든 HTTP 메서드(자바스크립트 요청) 허용
+        config.setAllowedHeaders(Collections.singletonList("*")); // 모든 HTTP 헤더 허용
+        config.setAllowCredentials(true); //클라이언트에서 쿠키 요청 허용
+        config.addAllowedOriginPattern("*"); //모든 IP 주소 허용 (프론트엔드 IP만 허용)
+        config.setMaxAge(3600L); //1시간 동안 캐시
+        config.addExposedHeader("Authorization"); //자바스크립트가 브라우저에서 토큰을 가져오기 위해 붙여줘야 함. 옛날에는 디폴트였으나 지금은 아니다
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return source;
+    }
+```

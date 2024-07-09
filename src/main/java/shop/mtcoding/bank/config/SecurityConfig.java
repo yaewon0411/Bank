@@ -99,7 +99,7 @@ public class SecurityConfig {
         config.setAllowCredentials(true); //클라이언트에서 쿠키 요청 허용
         config.addAllowedOriginPattern("*"); //모든 IP 주소 허용 (프론트엔드 IP만 허용)
         config.setMaxAge(3600L); //1시간 동안 캐시
-
+        config.addExposedHeader("Authorization"); //자바스크립트가 브라우저에서 토큰을 가져오기 위해 붙여줘야 함. 옛날에는 디폴트였으나 지금은 아니다
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
