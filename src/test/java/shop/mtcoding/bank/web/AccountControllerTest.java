@@ -66,6 +66,7 @@ public class AccountControllerTest extends DummyObject {
         userRepository.save(cos);
 
         Account ssarAccount = accountRepository.save(newAccount(1111L, user));
+        Account ssarAccount2 = accountRepository.save(newAccount(1112L, user));
         Account cosAccount = accountRepository.save(newAccount(2222L, cos));
         em.clear();
     }

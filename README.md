@@ -161,3 +161,4 @@ Access-Control-Expose-Headers는 서버가 브라우저의 스크립트에서 �
         return source;
     }
 ```
+https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header
