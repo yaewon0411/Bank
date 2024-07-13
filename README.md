@@ -204,3 +204,20 @@ https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_heade
     truncate table user_tb restart identity ;
     set referential_integrity true;
     ```
+    
+### 컨트롤러 테스트 시
+  - @SpringBootTest는 트랜잭션 경계를 가지지 않기 떄문에 더티 체킹이 이루어지지 않는다
+  - 따라서 이 때는 더티 체킹이 이루어져야 할 곳에서 명시적으로 save를 호출해 엔티티의 변경 사항을 반영해야 한다
+
+### 계좌 삭제 시 
+  - 트랜잭션이 존재할 경우 fk로 계좌 아이디가 사용되고 있기 때문에 제약 조건으로 인해 계좌 단독 삭제 절대 안됨
+  - 아래 어노테이션 달아서 논리적으로만 fk 걸어주고 물리적으로는 fk 영향 안받도록 걸어주면 계좌 삭제 시 영향 없음
+```java
+    @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+@ManyToOne(fetch = FetchType.LAZY)
+private Account withdrawAccount; //출금 계좌
+
+@JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+@ManyToOne(fetch = FetchType.LAZY)
+private Account depositAccount; //입금 계좌
+```
