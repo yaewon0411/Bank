@@ -189,7 +189,7 @@ public class AccountServiceTest extends DummyObject {
     public void 계좌입금_test3() throws Exception{
         //given
         Account account = newMockAccount(1L,1000L,1111L, null);
-        Long amount = 0L;
+        Long amount = 100L;
 
         //when
         if(amount<=0L){

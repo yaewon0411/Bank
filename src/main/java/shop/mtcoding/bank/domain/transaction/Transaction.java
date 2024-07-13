@@ -63,5 +63,6 @@ public class Transaction {
         this.tel = tel;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+
     }
 }

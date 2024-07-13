@@ -162,3 +162,45 @@ Access-Control-Expose-Headers는 서버가 브라우저의 스크립트에서 �
     }
 ```
 https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header
+
+
+### 시큐리티가 깔려있을 때 컨트롤러 테스트 시
+  - 아래 4개는 꼭 걸어주자!!
+```java
+@Sql("classpath:db/teadown.sql") //실행 시점 : BeforeEach 실행 직전마다!!
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@SpringBootTest(webEnvironment = WebEnvironment.MOCK)
+```
+
+
+### 레퍼지토리 테스트 시
+ - 아래 2개는 꼭 걸어주자!!
+```java
+@ActiveProfiles("test")
+@DataJpaTest //DB 관련된 Bean이 다 올라온다
+```
+ - 테스트 시 더미 데이터를 위한 beforeEach가 필요할 때 테스트 일관성 보장을 위해 다음을 관리
+```java
+    @BeforeEach
+    public void setUp(){
+        autoincrementReset();
+        dataSetting();
+        em.clear(); //레퍼지토리 테스트에서 필요!!
+    }
+
+    private void autoincrementReset() {
+        em.createNativeQuery("alter table user_tb alter column id restart with 1").executeUpdate();
+        em.createNativeQuery("alter table account_tb alter column id restart with 1").executeUpdate();
+        em.createNativeQuery("alter table transaction_tb alter column id restart with 1").executeUpdate();
+    }
+```
+  - 위 처럼 테스트 클래스 내에 네이티브 쿼리를 직접 넣어주던지, @Sql("classpath:db/teadown.sql") 이렇게 클래스패스에 작성해준 쿼리들을 테스트 클래스 전체에 어노테이션을 걸면 된다
+  - 이 때, 기본키 생성 전략을 지정해줘야 함 (h2여서 아래와 같이 사용. mysql이면 auto_increment = 1 이렇게 지정해줘야 함)
+    ```java
+    set referential_integrity false;
+    truncate table transaction_tb restart identity ;
+    truncate table account_tb restart identity ;
+    truncate table user_tb restart identity ;
+    set referential_integrity true;
+    ```

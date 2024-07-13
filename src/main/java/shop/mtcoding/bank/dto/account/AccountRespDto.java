@@ -8,6 +8,7 @@ import lombok.Data;
 import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.transaction.Transaction;
 import shop.mtcoding.bank.domain.user.User;
+import shop.mtcoding.bank.dto.transaction.TransactionRespDto;
 import shop.mtcoding.bank.util.CustomDateUtil;
 
 import java.util.ArrayList;
@@ -159,6 +160,62 @@ public class AccountRespDto {
                 this.id = account.getId();
                 this.number = account.getNumber();
                 this.balance = account.getBalance();
+            }
+        }
+    }
+
+    @Data
+    public static class AccountDetailRespDto {
+
+        private Long id; // 계좌 ID
+        private Long number; // 계좌번호
+        private Long balance;// 계좌 현재 최종 잔액
+        private List<TransactionRespDto.TransactionListRespDto.TransactionDto> transactions = new ArrayList<>();
+
+        public AccountDetailRespDto(Account account, List<Transaction> transactions) {
+            this.id = account.getId();
+            this.number = account.getNumber();
+            this.balance = account.getBalance();
+            this.transactions = transactions.stream()
+                    .map(transaction -> new TransactionRespDto.TransactionListRespDto.TransactionDto(transaction, account.getNumber()))
+                    .collect(Collectors.toList());
+        }
+
+
+        @Data
+        public static class TransactionDto {
+            private Long id;
+            private String gubun;
+            private Long amount;
+            private String sender;
+            private String receiver;
+            private String tel;
+            private String createdAt;
+            private Long balance;
+
+            public TransactionDto(Transaction transaction, Long accountNumber) {
+                this.id = transaction.getId();
+                this.gubun = transaction.getGubun().getValue();
+                this.amount = transaction.getAmount();
+                this.sender = transaction.getSender();
+                this.receiver = transaction.getReceiver();
+                this.createdAt = CustomDateUtil.toStringFormat(transaction.getCreatedAt());
+                this.tel = transaction.getTel() == null ? "없음" : transaction.getTel();
+
+                //트랜잭션이 출금 트랜잭션이면
+                if (transaction.getDepositAccount() == null) {
+                    this.balance = transaction.getWithdrawAccountBalance();
+                } else if (transaction.getWithdrawAccount() == null) {
+                    this.balance = transaction.getDepositAccountBalance();
+                } else {
+                    //출금 계좌와 입금 계좌 둘 다 값이 있을 때
+                    if (accountNumber.longValue() == transaction.getDepositAccount().getNumber()) {
+                        this.balance = transaction.getDepositAccountBalance();
+                        this.gubun = "입금";
+                    } else {
+                        this.balance = transaction.getWithdrawAccountBalance();
+                    }
+                }
             }
         }
     }
