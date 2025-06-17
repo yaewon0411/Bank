@@ -29,10 +29,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    //충돌 확인용 메서드
-    public void getUserInfo(Long userId){
-        userRepository.findById(userId)
-                .orElseThrow(() -> new CustomApiException("none exists user"));
+
+    public UserInfoRespDto getUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomApiException("존재하지 않는 유저"));
+        return new UserInfoRespDto(user);
     }
 
     //서비스는 DTO를 요청받고, DTO로 응답한다.
