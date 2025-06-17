@@ -2,9 +2,7 @@ package shop.mtcoding.bank.domain.user;
 
 import java.time.LocalDateTime;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -19,13 +17,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Getter;
 
 @Entity
 @Table(name = "user_tb")
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor //스프링이 User 객체 생성할 때 빈 생성자로 new를 하기 때문!!
+@ToString
 public class User { // extends 시간 설정(ex. BaseEntity) 상속해도 됨
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
