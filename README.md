@@ -213,7 +213,7 @@ https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_heade
   - 트랜잭션이 존재할 경우 fk로 계좌 아이디가 사용되고 있기 때문에 제약 조건으로 인해 계좌 단독 삭제 절대 안됨
   - 아래 어노테이션 달아서 논리적으로만 fk 걸어주고 물리적으로는 fk 영향 안받도록 걸어주면 계좌 삭제 시 영향 없음
 ```java
-    @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+@JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 @ManyToOne(fetch = FetchType.LAZY)
 private Account withdrawAccount; //출금 계좌
 
@@ -221,3 +221,21 @@ private Account withdrawAccount; //출금 계좌
 @ManyToOne(fetch = FetchType.LAZY)
 private Account depositAccount; //입금 계좌
 ```
+
+==========TODO=========
+```java
+
+public class Account{
+    ....
+    @Enumerated(EnumType.STRING)
+    private AccountStatus status;
+
+
+}
+
+public enum AccountStatus {
+    ACTIVE, CLOSED
+}
+```
+이런식으로  계좌가 생성되고 이용 중이면 ACTIVE로, 삭제되면 CLOSED로 놓기 -> 계좌가 삭제되어도 거래 내역은 남는 게 맞는 거 같음 
+
