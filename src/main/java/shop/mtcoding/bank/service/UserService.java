@@ -29,6 +29,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
+
+    public UserInfoRespDto getUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomApiException("존재하지 않는 유저"));
+        return new UserInfoRespDto(user);
+    }
+
     //서비스는 DTO를 요청받고, DTO로 응답한다.
     @Transactional //메서드 시작할 때, 시작되고, 종료될 때 함께 종료
     public JoinRespDto join(JoinReqDto joinReqDto){
